@@ -21,6 +21,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
 import com.codelabs.state.ui.StateCodelabTheme
 
 class TodoActivity : AppCompatActivity() {
@@ -36,5 +37,14 @@ class TodoActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun TodoActivityScreen(todoViewModel: TodoViewModel) {
+        TodoScreen(
+            items = todoViewModel.todoItems,
+            onAddItem = todoViewModel::addItem,
+            onRemoveItem = todoViewModel::removeItem
+        )
     }
 }
