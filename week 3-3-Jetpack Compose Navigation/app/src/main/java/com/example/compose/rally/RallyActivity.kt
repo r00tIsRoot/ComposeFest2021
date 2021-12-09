@@ -82,7 +82,10 @@ fun RallyApp() {
                 )
             }
         ) { innerPadding ->
-            RallyNavHost(navController, modifier = Modifier.padding(innerPadding))
+            RallyNavHost(
+                navController = navController,
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }
@@ -90,7 +93,10 @@ fun RallyApp() {
 
 
 @Composable
-fun RallyNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun RallyNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         navController = navController,
         startDestination = Overview.name,
@@ -100,17 +106,20 @@ fun RallyNavHost(navController: NavHostController, modifier: Modifier = Modifier
             OverviewBody(
                 onClickSeeAllAccounts = { navController.navigate(Accounts.name) },
                 onClickSeeAllBills = { navController.navigate(Bills.name) },
+                onAccountClick = { name ->
+                    navController.navigate("${Accounts.name}/$name")
+                },
             )
         }
         composable(Accounts.name) {
-            AccountsBody(accounts = UserData.accounts)
+            AccountsBody(accounts = UserData.accounts) { name ->
+                navController.navigate("Accounts/${name}")
+            }
         }
         composable(Bills.name) {
             BillsBody(bills = UserData.bills)
         }
-
-        val accountsName = RallyScreen.Accounts.name
-
+        val accountsName = Accounts.name
         composable(
             "$accountsName/{name}",
             arguments = listOf(
@@ -118,16 +127,13 @@ fun RallyNavHost(navController: NavHostController, modifier: Modifier = Modifier
                     type = NavType.StringType
                 },
             ),
-            deepLinks =  listOf(navDeepLink {
-                uriPattern = "rally://$accountsName/{name}"
-            })
-        ) { entry -> // Look up "name" in NavBackStackEntry's arguments
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "example://rally/$accountsName/{name}"
+            }),
+        ) { entry ->
             val accountName = entry.arguments?.getString("name")
-            // Find first name match in UserData
             val account = UserData.getAccount(accountName)
-            // Pass account to SingleAccountBody
             SingleAccountBody(account = account)
         }
-
     }
 }
