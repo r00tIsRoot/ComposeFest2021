@@ -1,15 +1,11 @@
 package com.example.compose.rally
 
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.example.compose.rally.ui.components.RallyTopAppBar
 import org.junit.Rule
 import org.junit.Test
-import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import java.util.*
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.printToLog
 
 class TopAppBarTest {
 
@@ -57,7 +53,13 @@ class TopAppBarTest {
         }
 
         composeTestRule
-            .onNodeWithContentDescription(RallyScreen.Accounts.name)
+            .onNode(
+                hasText(RallyScreen.Accounts.name.uppercase(Locale.getDefault())) and
+                        hasParent(
+                            hasContentDescription(RallyScreen.Accounts.name)
+                        ),
+                useUnmergedTree = true
+            )
             .assertExists()
     }
 }
