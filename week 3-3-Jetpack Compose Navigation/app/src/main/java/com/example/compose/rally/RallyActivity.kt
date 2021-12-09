@@ -30,12 +30,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.rally.ui.components.RallyTabRow
 import com.example.compose.rally.ui.theme.RallyTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.compose.rally.data.UserData
 import com.example.compose.rally.ui.accounts.AccountsBody
 import com.example.compose.rally.ui.bills.BillsBody
@@ -43,6 +46,7 @@ import com.example.compose.rally.ui.overview.OverviewBody
 import com.example.compose.rally.RallyScreen.Accounts
 import com.example.compose.rally.RallyScreen.Bills
 import com.example.compose.rally.RallyScreen.Overview
+import com.example.compose.rally.ui.accounts.SingleAccountBody
 
 /**
  * This Activity recreates part of the Rally Material Study from
@@ -77,25 +81,50 @@ fun RallyApp() {
                 )
             }
         ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = Overview.name,
-                modifier = Modifier.padding(innerPadding)
-            ) {
-
-                composable(Overview.name) {
-                    OverviewBody(
-                        onClickSeeAllAccounts = { navController.navigate(Accounts.name) },
-                        onClickSeeAllBills = { navController.navigate(Bills.name) },
-                    )
-                }
-                composable(Accounts.name) {
-                    AccountsBody(accounts = UserData.accounts)
-                }
-                composable(Bills.name) {
-                    BillsBody(bills = UserData.bills)
-                }
-            }
+            RallyNavHost(navController, modifier = Modifier.padding(innerPadding))
         }
+    }
+}
+
+
+
+@Composable
+fun RallyNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Overview.name,
+        modifier = modifier
+    ) {
+        composable(Overview.name) {
+            OverviewBody(
+                onClickSeeAllAccounts = { navController.navigate(Accounts.name) },
+                onClickSeeAllBills = { navController.navigate(Bills.name) },
+            )
+        }
+        composable(Accounts.name) {
+            AccountsBody(accounts = UserData.accounts)
+        }
+        composable(Bills.name) {
+            BillsBody(bills = UserData.bills)
+        }
+
+        val accountsName = RallyScreen.Accounts.name
+
+        composable(
+            "$accountsName/{name}",
+            arguments = listOf(
+                navArgument("name") {
+                    // Make argument type safe
+                    type = NavType.StringType
+                }
+            )
+        ) { entry -> // Look up "name" in NavBackStackEntry's arguments
+            val accountName = entry.arguments?.getString("name")
+            // Find first name match in UserData
+            val account = UserData.getAccount(accountName)
+            // Pass account to SingleAccountBody
+            SingleAccountBody(account = account)
+        }
+
     }
 }
